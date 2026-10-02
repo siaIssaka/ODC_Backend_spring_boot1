@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagramme de classes - Cœur pédagogique EduFlex</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 {
+      text-align: center;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 28px;
+    }
+    .diagram {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .class-box {
+      background: white;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      width: 260px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+    .class-header {
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
+      color: white;
+      padding: 12px 14px;
+      font-weight: 700;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      text-align: center;
+    }
+    .class-body {
+      padding: 12px 14px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .class-body .attr {
+      color: #1e293b;
+    }
+    .relations {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 18px 0;
+      font-weight: 700;
+      color: #334155;
+      letter-spacing: 0.03em;
+    }
+    .arrow {
+      font-size: 22px;
+      color: #0f766e;
+      padding: 0 12px;
+    }
+    .legend {
+      margin-top: 28px;
+      background: white;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      padding: 16px 18px;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+      color: #334155;
+    }
+    .legend h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    ul {
+      margin: 8px 0 0 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme de classes – Cœur pédagogique EduFlex</h1>
+  <div class="subtitle">Modèle métier et pédagogique aligné sur la structure Java du projet</div>
+
+  <div class="diagram">
+    <div class="class-box">
+      <div class="class-header">User</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- nom: String</div>
+        <div class="attr">- prenom: String</div>
+        <div class="attr">- email: String</div>
+        <div class="attr">- role: Role</div>
+        <div class="attr">- active: boolean</div>
+      </div>
+    </div>
+
+    <div class="class-box">
+      <div class="class-header">Course</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- title: String</div>
+        <div class="attr">- description: String</div>
+        <div class="attr">- level: String</div>
+        <div class="attr">- price: Double</div>
+        <div class="attr">- published: boolean</div>
+        <div class="attr">- category: Category</div>
+        <div class="attr">- instructor: User</div>
+      </div>
+    </div>
+
+    <div class="class-box">
+      <div class="class-header">Category</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- name: String</div>
+        <div class="attr">- description: String</div>
+        <div class="attr">- active: boolean</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="relations">
+    <span>User</span>
+    <span class="arrow">→</span>
+    <span>instructor / apprenant</span>
+    <span class="arrow">→</span>
+    <span>Course</span>
+  </div>
+
+  <div class="diagram">
+    <div class="class-box">
+      <div class="class-header">Module</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- title: String</div>
+        <div class="attr">- description: String</div>
+        <div class="attr">- orderIndex: Integer</div>
+        <div class="attr">- course: Course</div>
+      </div>
+    </div>
+
+    <div class="class-box">
+      <div class="class-header">Lesson</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- title: String</div>
+        <div class="attr">- content: String</div>
+        <div class="attr">- course: Course</div>
+        <div class="attr">- module: Module</div>
+        <div class="attr">- videoUrl: String</div>
+        <div class="attr">- documentUrl: String</div>
+        <div class="attr">- orderIndex: Integer</div>
+      </div>
+    </div>
+
+    <div class="class-box">
+      <div class="class-header">Progress</div>
+      <div class="class-body">
+        <div class="attr">- id: Long</div>
+        <div class="attr">- user: User</div>
+        <div class="attr">- course: Course</div>
+        <div class="attr">- completedLessons: int</div>
+        <div class="attr">- totalLessons: int</div>
+        <div class="attr">- percentage: double</div>
+        <div class="attr">- status: ProgressStatus</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="relations">
+    <span>Course</span>
+    <span class="arrow">1 ──── N</span>
+    <span>Module</span>
+    <span class="arrow">1 ──── N</span>
+    <span>Lesson</span>
+  </div>
+
+  <div class="relations">
+    <span>User</span>
+    <span class="arrow">1 ──── N</span>
+    <span>Enrollment</span>
+    <span class="arrow">N ──── 1</span>
+    <span>Course</span>
+  </div>
+
+  <div class="legend">
+    <h2>Conventions métier</h2>
+    <ul>
+      <li>Un <strong>Course</strong> appartient à une <strong>Category</strong> et est dispensé par un <strong>User</strong> avec le rôle formateur.</li>
+      <li>Un <strong>Course</strong> contient plusieurs <strong>Module</strong> ; chaque module contient plusieurs <strong>Lesson</strong>.</li>
+      <li>Un <strong>User</strong> peut s’inscrire à plusieurs cours via <strong>Enrollment</strong>.</li>
+      <li>Un <strong>Progress</strong> suit l’avancement d’un apprenant sur un cours donné.</li>
+      <li>Les relations sont orientées comme dans le modèle JPA réel : compositions pédagogiques et associations entre utilisateur, cours, progression et inscription.</li>
+    </ul>
+  </div>
+</body>
+</html>

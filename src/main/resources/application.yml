@@ -1,0 +1,61 @@
+# Aucune valeur secrète en dur : tout vient de variables d'environnement.
+# Développement local : SPRING_PROFILES_ACTIVE=dev (voir application-dev.yml). Modèle : .env.example
+server:
+  port: ${PORT:8000}
+
+spring:
+  application:
+    name: ODC-Academy
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 125MB
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ODCtest}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}   # obligatoire hors profil dev
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}  # le schéma est géré par Flyway (db/migration) ; Hibernate ne fait que le vérifier
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true         # base existante (créée par Hibernate) : Flyway s'y greffe sans rien casser
+    baseline-version: 0
+
+app:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}   # vide = bouton Google masqué
+  storage:
+    location: ${ODC_UPLOAD_DIR:uploads}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}   # ex. https://academy.mondomaine.com,https://www.mondomaine.com
+  public-url: ${PUBLIC_URL:http://localhost:4200}
+  mail:
+    enabled: ${APP_MAIL_ENABLED:false}                      # + SPRING_MAIL_HOST, SPRING_MAIL_PORT, SPRING_MAIL_USERNAME, SPRING_MAIL_PASSWORD
+    from: ${APP_MAIL_FROM:no-reply@odc-academy.local}
+    log-links: ${APP_MAIL_LOG_LINKS:false}                  # DEV seulement : écrit le lien de réinitialisation dans les logs
+
+application:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}           # obligatoire : 32+ caractères aléatoires (openssl rand -base64 48)
+      expiration: ${JWT_EXPIRATION_MS:86400000}
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /swagger-ui.html
+
+logging:
+  level:
+    org.springframework.security: INFO

@@ -1,0 +1,18 @@
+# Profil de développement local UNIQUEMENT (ne jamais l'activer en production).
+spring:
+  datasource:
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: false
+application:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+app:
+  mail:
+    log-links: false
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
