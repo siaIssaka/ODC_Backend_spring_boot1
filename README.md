@@ -81,7 +81,9 @@ Le modèle des variables de déploiement est dans [`.env.example`](./.env.exampl
 | `DDL_AUTO` | Mode de gestion Hibernate | `validate` |
 | `JWT_SECRET` | Secret de signature JWT | Obligatoire dans tous les profils, 32+ caractères aléatoires |
 | `JWT_EXPIRATION_MS` | Durée du JWT | `86400000` ms |
-| `ODC_UPLOAD_DIR` | Répertoire persistant des fichiers | `uploads` |
+| `ODC_UPLOAD_DIR` | Répertoire des vidéos, documents et dépôts locaux | `uploads` |
+| `MEDIA_STORAGE_PROVIDER` | Stockage des images (`local` ou `cloudinary`) | `local` |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Identifiants Cloudinary (requis si le fournisseur vaut `cloudinary`) | Vides |
 | `CORS_ORIGINS` | Origines frontend permises | `http://localhost:4200` |
 | `PUBLIC_URL` | URL publique de l’application | `http://localhost:4200` |
 | `ODC_ADMIN_EMAIL` / `ODC_ADMIN_PASSWORD` | Bootstrap du premier admin | Vides par défaut |
@@ -153,7 +155,7 @@ Les DTO et signatures précises des routes sont documentés par OpenAPI. Les op�
 
 ## Fichiers et médias
 
-Les médias sont écrits dans le répertoire défini par `ODC_UPLOAD_DIR`. Les formats et tailles sont validés par l’API : notamment PDF/DOCX/PPTX pour les supports, MP4/WEBM/MOV pour les vidéos, et PNG/JPG/WEBP pour les images. Les PDF sont renvoyés en `application/pdf` et `Content-Disposition: inline`; le frontend les récupère comme blob pour les lire dans son lecteur intégré même lorsque l’API est sur une autre origine. Les dépôts de devoirs acceptent PDF/DOC/DOCX/TXT.
+Les vidéos, documents et dépôts sont écrits dans le répertoire défini par `ODC_UPLOAD_DIR`. Par défaut, les images PNG/JPG/WEBP y sont également stockées ; définir `MEDIA_STORAGE_PROVIDER=cloudinary` et fournir les trois variables Cloudinary les envoie vers Cloudinary et conserve les URL dans la base de données. Les fichiers images acceptés sont limités à 2 Mo. Les PDF sont renvoyés en `application/pdf` et `Content-Disposition: inline`; le frontend les récupère comme blob pour les lire dans son lecteur intégré même lorsque l’API est sur une autre origine. Les dépôts de devoirs acceptent PDF/DOC/DOCX/TXT.
 
 En production, placez ce répertoire sur un volume persistant, définissez des permissions minimales et mettez-le dans la politique de sauvegarde. Ne supprimez pas manuellement les fichiers pendant que l’application les référence en base.
 
@@ -176,7 +178,7 @@ bash scripts/smoke-test.sh http://localhost:8000/api/v1
 ## Déploiement
 
 1. Créez une base PostgreSQL et un compte applicatif dédiés, avec les privilèges requis.
-2. Configurez `DB_*`, `JWT_SECRET`, `CORS_ORIGINS`, `PUBLIC_URL`, `ODC_UPLOAD_DIR` et les paramètres optionnels depuis le gestionnaire de secrets.
+2. Configurez `DB_*`, `JWT_SECRET`, `CORS_ORIGINS`, `PUBLIC_URL`, `ODC_UPLOAD_DIR` et les paramètres optionnels depuis le gestionnaire de secrets. Pour conserver les images sur Render Free, créez un compte Cloudinary, récupérez **Cloud name**, **API Key** et **API Secret** dans la console Cloudinary, puis ajoutez ces variables dans Render : `MEDIA_STORAGE_PROVIDER=cloudinary`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` et `CLOUDINARY_API_SECRET`. Gardez l'API Secret uniquement côté backend et ne la commitez jamais. Après le redéploiement, les nouvelles images sont envoyées vers Cloudinary ; les anciennes images stockées localement doivent être téléversées à nouveau si elles ont déjà disparu.
 3. Ne définissez pas `SPRING_PROFILES_ACTIVE=dev` en production.
 4. Démarrez le backend : Flyway applique les migrations puis Hibernate valide le schéma.
 5. Configurez un reverse proxy HTTPS : transmettez `/api/` vers le port backend et servez le frontend sur le même domaine si son environnement de production utilise `/api/v1`.
@@ -201,7 +203,7 @@ Dans `ODCtest`, développez **Schemas → public → Tables**, puis actualisez l
 
 ### Impossible de consulter un média
 
-Vérifiez que le fichier existe dans le répertoire configuré par `ODC_UPLOAD_DIR`, que ce chemin persiste entre les redémarrages et que le backend peut le lire.
+Pour une image, vérifiez `MEDIA_STORAGE_PROVIDER` et les trois identifiants Cloudinary ; si le fournisseur vaut `local`, contrôlez plutôt que le fichier existe dans le répertoire `ODC_UPLOAD_DIR`. Pour une vidéo, un document ou un dépôt de devoir, vérifiez toujours ce répertoire et son stockage persistant.
 
 ## Documentation associée
 
