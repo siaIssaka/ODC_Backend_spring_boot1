@@ -1,5 +1,8 @@
 package com.example.ODC_Academy.media;
 
+import com.example.ODC_Academy.lesson.LessonRepository;
+import com.example.ODC_Academy.security.CourseContentAccess;
+import com.example.ODC_Academy.security.SecurityUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -17,12 +20,24 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping("/api/v1/media")
 public class MediaController {
     private final MediaStorageService storage;
+    private final LessonRepository lessons;
+    private final CourseContentAccess contentAccess;
+    private final SecurityUtils securityUtils;
 
-    public MediaController(MediaStorageService storage) { this.storage = storage; }
+    public MediaController(MediaStorageService storage, LessonRepository lessons,
+                           CourseContentAccess contentAccess, SecurityUtils securityUtils) {
+        this.storage = storage;
+        this.lessons = lessons;
+        this.contentAccess = contentAccess;
+        this.securityUtils = securityUtils;
+    }
 
     @GetMapping("/{key:.+}")
     public ResponseEntity<Resource> get(@PathVariable String key,
                                         @RequestParam(defaultValue = "false") boolean download) {
+        String mediaUrl = "/api/v1/media/" + key;
+        lessons.findByVideoUrlOrDocumentUrl(mediaUrl, mediaUrl)
+                .ifPresent(lesson -> contentAccess.assertCanView(securityUtils.getCurrentUser(), lesson.getCourse()));
         boolean video = key.endsWith(".mp4") || key.endsWith(".webm") || key.endsWith(".mov");
         boolean pdf = key.endsWith(".pdf");
         boolean inline = !download && (video || pdf || key.endsWith(".png") || key.endsWith(".jpg")

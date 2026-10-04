@@ -8,6 +8,7 @@ import com.example.ODC_Academy.model.quiz.*;
 import com.example.ODC_Academy.progress.LessonProgressService;
 import com.example.ODC_Academy.quiz.QuizDtos.*;
 import com.example.ODC_Academy.security.CourseAccess;
+import com.example.ODC_Academy.security.CourseContentAccess;
 import com.example.ODC_Academy.user.Role;
 import com.example.ODC_Academy.user.User;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,9 +25,12 @@ public class QuizService {
     private final QuizAttemptRepository attempts;
     private final LessonRepository lessons;
     private final LessonProgressService lessonProgress;
+    private final CourseContentAccess contentAccess;
 
-    public QuizService(QuizRepository q, QuizAttemptRepository a, LessonRepository l, LessonProgressService p) {
+    public QuizService(QuizRepository q, QuizAttemptRepository a, LessonRepository l, LessonProgressService p,
+                       CourseContentAccess contentAccess) {
         this.quizzes = q; this.attempts = a; this.lessons = l; this.lessonProgress = p;
+        this.contentAccess = contentAccess;
     }
 
     private Lesson lesson(Long id) {
@@ -61,6 +65,7 @@ public class QuizService {
     @Transactional(readOnly = true)
     public Optional<QuizView> forLesson(Long lessonId, User me) {
         Lesson lesson = lesson(lessonId);
+        contentAccess.assertCanView(me, lesson.getCourse());
         return quizzes.findByLessonId(lessonId).map(q -> view(q, CourseAccess.manages(me, lesson.getCourse())));
     }
 
@@ -74,6 +79,7 @@ public class QuizService {
     public AttemptResult attempt(Long quizId, AttemptRequest r, User me) {
         if (me.getRole() != Role.APPRENANT) throw new AccessDeniedException("Réservé aux apprenants");
         Quiz quiz = quizzes.findById(quizId).orElseThrow(() -> ResourceNotFoundException.of("Quiz", quizId));
+        contentAccess.assertCanView(me, quiz.getLesson().getCourse());
         List<Long> wrong = new ArrayList<>();
         int ok = 0;
         for (Question q : quiz.getQuestions()) {

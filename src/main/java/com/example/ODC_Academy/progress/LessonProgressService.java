@@ -1,12 +1,13 @@
 package com.example.ODC_Academy.progress;
 
 import com.example.ODC_Academy.enrollment.EnrollmentRepository;
-import com.example.ODC_Academy.exception.BadRequestException;
 import com.example.ODC_Academy.exception.ResourceNotFoundException;
 import com.example.ODC_Academy.lesson.Lesson;
 import com.example.ODC_Academy.lesson.LessonRepository;
 import com.example.ODC_Academy.status.ProgressStatus;
+import com.example.ODC_Academy.status.EnrollmentStatus;
 import com.example.ODC_Academy.user.User;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +36,10 @@ public class LessonProgressService {
     @Transactional
     public void completeInternal(Lesson lesson, User learner) {
         Long courseId = lesson.getCourse().getId();
-        if (enrollments.findByUserIdAndCourseId(learner.getId(), courseId).isEmpty())
-            throw new BadRequestException("Vous n'êtes pas inscrit à ce cours");
+        boolean activelyEnrolled = enrollments.findByUserIdAndCourseId(learner.getId(), courseId)
+                .filter(enrollment -> enrollment.getStatus() == EnrollmentStatus.ACTIVE)
+                .isPresent();
+        if (!activelyEnrolled) throw new AccessDeniedException("Une inscription active est requise pour accéder à ce cours");
         if (!completions.existsByUserIdAndLessonId(learner.getId(), lesson.getId())) {
             completions.save(LessonCompletion.builder().user(learner).lesson(lesson).completedAt(LocalDateTime.now()).build());
         }
@@ -53,6 +56,10 @@ public class LessonProgressService {
 
     @Transactional(readOnly = true)
     public List<Long> completedLessonIds(Long userId, Long courseId) {
+        boolean activelyEnrolled = enrollments.findByUserIdAndCourseId(userId, courseId)
+                .filter(enrollment -> enrollment.getStatus() == EnrollmentStatus.ACTIVE)
+                .isPresent();
+        if (!activelyEnrolled) throw new AccessDeniedException("Une inscription active est requise pour accéder à ce cours");
         return completions.findByUserIdAndLessonCourseId(userId, courseId).stream().map(c -> c.getLesson().getId()).toList();
     }
 }

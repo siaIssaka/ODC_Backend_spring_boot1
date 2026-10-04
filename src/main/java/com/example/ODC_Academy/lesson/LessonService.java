@@ -9,6 +9,7 @@ import com.example.ODC_Academy.module.ModuleRepository;
 import com.example.ODC_Academy.media.MediaStorageService;
 import com.example.ODC_Academy.security.SecurityUtils;
 import com.example.ODC_Academy.security.CourseAccess;
+import com.example.ODC_Academy.security.CourseContentAccess;
 import com.example.ODC_Academy.user.Role;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +28,23 @@ public class LessonService {
     private final ModuleRepository moduleRepository;
     private final SecurityUtils securityUtils;
     private final MediaStorageService mediaStorage;
+    private final CourseContentAccess contentAccess;
 
     public LessonService(LessonRepository lessonRepository, CourseRepository courseRepository,
                          ModuleRepository moduleRepository, SecurityUtils securityUtils,
-                         MediaStorageService mediaStorage) {
+                         MediaStorageService mediaStorage, CourseContentAccess contentAccess) {
         this.lessonRepository = lessonRepository;
         this.courseRepository = courseRepository;
         this.moduleRepository = moduleRepository;
         this.securityUtils = securityUtils;
         this.mediaStorage = mediaStorage;
+        this.contentAccess = contentAccess;
     }
 
     public List<Lesson> getLessonsByCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> ResourceNotFoundException.of("Cours", courseId));
+        contentAccess.assertCanView(securityUtils.getCurrentUser(), course);
         return lessonRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
     }
 

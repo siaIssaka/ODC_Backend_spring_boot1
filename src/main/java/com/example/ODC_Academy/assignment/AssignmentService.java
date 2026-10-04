@@ -9,6 +9,7 @@ import com.example.ODC_Academy.exception.BadRequestException;
 import com.example.ODC_Academy.exception.ResourceNotFoundException;
 import com.example.ODC_Academy.media.MediaStorageService;
 import com.example.ODC_Academy.security.CourseAccess;
+import com.example.ODC_Academy.security.CourseContentAccess;
 import com.example.ODC_Academy.status.EnrollmentStatus;
 import com.example.ODC_Academy.user.Role;
 import com.example.ODC_Academy.user.User;
@@ -28,10 +29,12 @@ public class AssignmentService {
     private final CourseRepository courses;
     private final EnrollmentRepository enrollments;
     private final MediaStorageService storage;
+    private final CourseContentAccess contentAccess;
 
     public AssignmentService(AssignmentRepository a, SubmissionRepository s, CourseRepository c,
-                             EnrollmentRepository e, MediaStorageService m) {
-        this.assignments = a; this.submissions = s; this.courses = c; this.enrollments = e; this.storage = m;
+                             EnrollmentRepository e, MediaStorageService m, CourseContentAccess contentAccess) {
+        this.assignments = a; this.submissions = s; this.courses = c; this.enrollments = e;
+        this.storage = m; this.contentAccess = contentAccess;
     }
 
     /** ADMIN, ou formateur affecté à la formation du cours. */
@@ -83,6 +86,8 @@ public class AssignmentService {
 
     @Transactional(readOnly = true)
     public List<AssignmentDto> forCourse(Long courseId, User me) {
+        Course course = courses.findById(courseId).orElseThrow(() -> ResourceNotFoundException.of("Cours", courseId));
+        contentAccess.assertCanView(me, course);
         return assignments.findByCourseIdOrderByClosesAtAsc(courseId).stream().map(a -> toDto(a, me)).toList();
     }
 
