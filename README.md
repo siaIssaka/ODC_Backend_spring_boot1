@@ -1,6 +1,6 @@
 # ODC Academy — Backend
 
-API REST d’ODC Academy, développée en Java 21 avec Spring Boot, Spring Security, Spring Data JPA, Flyway et PostgreSQL. Le backend gère les comptes, les formations, les cours et les activités d’apprentissage.
+API REST d’ODC Academy, développée en Java 25 avec Spring Boot, Spring Security, Spring Data JPA, Flyway et PostgreSQL. Le backend gère les comptes, les formations, les cours et les activités d’apprentissage.
 
 ## Sommaire
 
@@ -29,7 +29,7 @@ API REST d’ODC Academy, développée en Java 21 avec Spring Boot, Spring Secur
 
 ## Prérequis
 
-- Java 21.
+- Java 25.
 - PostgreSQL (base locale utilisée dans le projet : `ODCtest`).
 - PowerShell sous Windows.
 
@@ -184,7 +184,7 @@ bash scripts/smoke-test.sh http://localhost:8000/api/v1
 7. Maintenez les fichiers téléversés sur un volume persistant sauvegardé.
 8. Désactivez Swagger en production sauf besoin opérationnel précis.
 
-Aucun `Dockerfile` ou fichier Docker Compose n’est actuellement fourni dans ce projet.
+Le projet inclut un `Dockerfile` utilisant Java 25 pour la compilation et l’exécution.
 
 ## Dépannage
 
